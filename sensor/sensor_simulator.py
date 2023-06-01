@@ -3,7 +3,7 @@ import time
 
 
 # Total number of sensors
-NUMBER_SENSORS = 30
+NUMBER_SENSORS = 7
 
 # Max capacity of the garbage container
 MAX_CAPACITY = 100
@@ -22,7 +22,7 @@ data = [str(INITIAL_PERCENTAGE) + "\n"] * NUMBER_SENSORS
 data[-1] = data[-1].strip("\n")
 
 # Reset old sensor data
-with open(f"sensor_data.txt", "w") as file:
+with open("sensor_data.txt", "w") as file:
     # for i in range(1, NUMBER_SENSORS + 1):
     file.writelines(data)
 
@@ -64,7 +64,7 @@ while True:
     data[-1] = data[-1].strip("\n")
 
     # Write new fill percentages to the sensor data file
-    with open(f"sensor_data.txt", "w") as file:
+    with open("sensor_data.txt", "w") as file:
         file.writelines(data)
 
     print("Sensor data updated.")
