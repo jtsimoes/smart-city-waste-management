@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RSA</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css">
-    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <title>Smart City Waste Management</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         body {
             padding: 0;
@@ -54,51 +54,90 @@
         popupAnchor: [0, -10]
     });
 
-    var truck1 = L.marker([40.64486115472638, -8.653944858530267], { icon: truckIcon }).addTo(map).bindPopup("<b>Truck #1</b><br>(moving)").openPopup();
-    var truck2 = L.marker([40.64576115472638, -8.651944858530267], { icon: truckIcon }).addTo(map).bindPopup("<b>Truck #2</b><br>(waiting)");
-    var truck3 = L.marker([40.64426115472638, -8.651844858530267], { icon: truckIcon }).addTo(map).bindPopup("<b>Truck #3</b><br>(unloading)");
+    var truck1 = L.marker([40.64486115472638, -8.653944858530267], { icon: truckIcon }).addTo(map).bindPopup("<b>Truck #1</b><br>(waiting)", { closeOnClick: false, autoClose: false }).openPopup();
+    var truck2 = L.marker([40.64576115472638, -8.651944858530267], { icon: truckIcon }).addTo(map).bindPopup("<b>Truck #2</b><br>(waiting)", { closeOnClick: false, autoClose: false });
+    var truck3 = L.marker([40.64426115472638, -8.651844858530267], { icon: truckIcon }).addTo(map).bindPopup("<b>Truck #3</b><br>(unloading)", { closeOnClick: false, autoClose: false });
 
-    var garbage1 = L.marker([40.64496115472638, -8.648944858530267], { icon: garbageIcon }).addTo(map).bindPopup("<b>Garbage #1</b><br>(not full)");
-    var garbage2 = L.marker([40.64596115472638, -8.647944858530267], { icon: garbageIcon }).addTo(map).bindPopup("<b>Garbage #2</b><br>(not full)");
-    var garbage3 = L.marker([40.64696115472638, -8.646944858530267], { icon: garbageIcon }).addTo(map).bindPopup("<b>Garbage #3</b><br>(not full)");
-    var garbage4 = L.marker([40.64796115472638, -8.644944858530267], { icon: garbageIcon }).addTo(map).bindPopup("<b>Garbage #4</b><br>(full)");
+    var garbage1 = L.marker([40.64496115472638, -8.648944858530267], { icon: garbageIcon }).addTo(map).bindPopup("<b>Garbage #1</b><br>(not full)", { closeOnClick: false, autoClose: false });
+    var garbage2 = L.marker([40.64596115472638, -8.647944858530267], { icon: garbageIcon }).addTo(map).bindPopup("<b>Garbage #2</b><br>(not full)", { closeOnClick: false, autoClose: false });
+    var garbage3 = L.marker([40.64696115472638, -8.646944858530267], { icon: garbageIcon }).addTo(map).bindPopup("<b>Garbage #3</b><br>(not full)", { closeOnClick: false, autoClose: false });
+    var garbage4 = L.marker([40.64796115472638, -8.644944858530267], { icon: garbageIcon }).addTo(map).bindPopup("<b>Garbage #4</b><br>(full)", { closeOnClick: false, autoClose: false });
+
+
+    //var trucks_layer = L.layerGroup([truck1, truck2, truck3]);
+    var route_layer = L.layerGroup().addTo(map);
+    //var garbage_layer = L.layerGroup([garbage1, garbage2, garbage3]);
+
 
     // TODO: Temporary hardcoded positions
     var positionsArray = [
-        [40.643778, -8.65413],
+        [40.643778, -8.654130],
         [40.643573, -8.653911],
         [40.643361, -8.653643],
         [40.643499, -8.653461],
         [40.643597, -8.653343],
         [40.643752, -8.653525],
         [40.643907, -8.653708],
-        [40.64389, -8.653965]
+        [40.643890, -8.653965]
     ];
 
-    updateMarkerPosition(truck1, positionsArray);
-
-    function updateMarkerPosition(truck1, positionsArray) {
-        truck1.setLatLng(positionsArray[0]).update();
-
-        positionsArray.shift();
-
-        if (positionsArray.length === 0) {
-            var positionsArray = [
-                [40.643778, -8.65413],
-                [40.643573, -8.653911],
-                [40.643361, -8.653643],
-                [40.643499, -8.653461],
-                [40.643597, -8.653343],
-                [40.643752, -8.653525],
-                [40.643907, -8.653708],
-                [40.64389, -8.653965]
-            ];
+    const loop = setInterval(function () {
+    updateMarkerPosition(truck1).then(
+        function (value) {
+            if (value === false) {
+                clearInterval(loop);
+            } else {
+                updatePolylineRoute(truck1)
+            }
+        },
+        function (error) {
+            clearInterval(loop);
         }
+    );
+    }, 5_000);
 
-        if (positionsArray.length > 0) {
-            setTimeout(function () {
-                updateMarkerPosition(truck1, positionsArray);
-            }, 1000);
+    async function updateMarkerPosition(marker) {
+        try {
+            const response = await fetch('/truck/1');
+            const data = await response.json();
+
+            if (response.ok) {
+                console.log("Success:", data);
+
+                marker.setLatLng([data["latitude"], data["longitude"]]).update();
+                marker.setPopupContent("<b>Truck #" + data["id"] + "</b><br>(" + data["state"] + ")").openPopup();
+
+                return true;
+            } else {
+                console.error("Error fetching truck id:", data["detail"]);
+                return false;
+            }
+        } catch (error) {
+            console.error("Error fetching truck position:", error);
+            return false;
+        }
+    }
+
+    async function updatePolylineRoute(marker) {
+        try {
+            const response = await fetch('/route');
+            const data = await response.json();
+
+            if (response.ok) {
+                console.log("Success:", data);
+
+                route_layer.clearLayers();
+                var polyline = L.polyline(data["geometry"], { color: "red" }).bindPopup("<b>Distance:</b><br>" + data["distance"] + " km<br><b>ETA:</b><br>" + data["duration"], { closeOnClick: false, autoClose: false }).addTo(route_layer).openPopup();
+                map.fitBounds(polyline.getBounds());
+                
+                return true;
+            } else {
+                console.error("Error fetching route:", data["detail"]);
+                return false;
+            }
+        } catch (error) {
+            console.error("Error fetching route:", error);
+            return false;
         }
     }
 
