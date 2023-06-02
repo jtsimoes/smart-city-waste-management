@@ -23,7 +23,6 @@ data[-1] = data[-1].strip("\n")
 
 # Reset old sensor data
 with open("sensor_data.txt", "w") as file:
-    # for i in range(1, NUMBER_SENSORS + 1):
     file.writelines(data)
 
 while True:
@@ -43,7 +42,7 @@ while True:
             print(f"Garbage container #{sensor_id + 1} needs to be emptied!")
         else:
             # Faster fill rate while the garbage container is less full than the chosen warning percentage
-            max_fill_rate = 5
+            max_fill_rate = 15
 
         # Randomly generate a fill rate for the garbage container
         fill_rate = random.uniform(0, max_fill_rate)
@@ -70,4 +69,4 @@ while True:
     print("Sensor data updated.")
 
     # Simulate some delay between fill iterations
-    time.sleep(1)
+    time.sleep(4)
