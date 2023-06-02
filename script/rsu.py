@@ -10,16 +10,41 @@ WARNING_PERCENTAGE = 70
 # Total number of sensors
 NUMBER_SENSORS = 7
 
+# Coordinates of all possible garbage containers
 garbage_coordinates = [
-    (40.631709, -8.6875641),
-    (40.6258137, -8.6448027),
-    (40.639794, -8.6435776),
-    (40.621431, -8.6291841),
-    (40.6669451, -8.6258256),
-    (40.6451389, -8.6435942),
-    (40.6327564, -8.6374649),
+    [40.639089, -8.650802],
+    [40.641669, -8.648054],
+    [40.638034, -8.644034],
+    [40.627141, -8.645695],
+    [40.626920, -8.651401],
+    [40.633373, -8.655760],
+    [40.630078, -8.659179],
+    [40.638556, -8.657554],
+    [40.641701, -8.655609],
+    [40.642703, -8.655421],
+    [40.646985, -8.651289],
+    [40.643648, -8.639638],
+    [40.638621, -8.639318],
+    [40.637050, -8.632803],
+    [40.632896, -8.631251],
+    [40.626729, -8.637357],
+    [40.618851, -8.654700],
+    [40.623699, -8.649597],
+    [40.632037, -8.650261],
+    [40.630318, -8.653844],
+    [40.633382, -8.661360],
+    [40.636627, -8.649961],
+    [40.635358, -8.645863],
+    [40.631908, -8.646494],
+    [40.634004, -8.648422],
+    [40.640516, -8.651795],
+    [40.636870, -8.653476],
+    [40.628768, -8.659954],
+    [40.623382, -8.657870],
+    [40.643800, -8.651797],
 ]
 
+# List containing the most recent position of each truck
 truck_positions = [
     [40.6317090, -8.6875641],
     [40.6258137, -8.6448027],
@@ -32,7 +57,6 @@ def on_connect(client, userdata, flags, rc):
     #client.subscribe("vanetza/in/denm")
 
 
-# É chamada automaticamente sempre que recebe uma mensagem nos tópicos subscritos em cima
 def on_message(client, userdata, msg):
     message = json.loads(msg.payload.decode('utf-8'))
     
@@ -93,7 +117,7 @@ while(True):
             generate(sensor_id, garbage_coordinates[sensor_id][0], garbage_coordinates[sensor_id][1])
 
             data[sensor_id] = "0\n"
-            with open("sensor_data.txt", "w") as file:
+            with open("../sensor/sensor_data.txt", "w") as file:
                 file.writelines(data)
 
             time.sleep(1)
