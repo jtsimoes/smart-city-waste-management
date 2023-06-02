@@ -3,7 +3,7 @@ import time
 
 
 # Total number of sensors
-NUMBER_SENSORS = 7
+NUMBER_SENSORS = 26
 
 # Max capacity of the garbage container
 MAX_CAPACITY = 100
@@ -70,4 +70,4 @@ while True:
     print("Sensor data updated.")
 
     # Simulate some delay between fill iterations
-    time.sleep(3)
+    time.sleep(1)
