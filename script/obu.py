@@ -157,7 +157,7 @@ def sort_by_distance(queue, truck_position):
 
 
 # Draw the route between the truck and the next garbage container(s)
-def draw_route(points):
+def draw_route(points, route_id):
     #
     # Mapbox Directions API
     # https://docs.mapbox.com/api/navigation/directions/
@@ -170,6 +170,9 @@ def draw_route(points):
 
     print(f"NUMBER OF POINTS: {len(points)}")
     print(f"POINTS: {points}")
+
+    if len(points) < 2:     # TODO: check
+        return points
 
     if len(points) > 25:
         print("\nERROR: You can only request directions for up to 25 points at a time.")
@@ -201,9 +204,11 @@ def draw_route(points):
     # print("\n - ETA:", route_duration)
     # print("\n - Route:", route_geometry)
 
-    # TODO: Save this object to a file
+    with open(f"../dashboard/static/route_obu{route_id}.json", "w") as file:
+        json.dump({"geometry": route_geometry}, file)
+
     # return {"distance": route_distance, "duration": route_duration, "geometry": route_geometry}
-    print(f"ROUTE: {route_geometry}")
+    print(f"\n\n\nGENERATED ROUTE FOR TRUCK #{route_id}\n\n\n")
     return route_geometry
 
 
@@ -219,7 +224,7 @@ def on_message(client, userdata, msg):
     print('Message' + str(message))
 
     assigned_truck = message["fields"]["denm"]["situation"]["eventType"]["subCauseCode"]
-    truck_id = message["stationID"]
+    truck_id = message["receiverID"]
 
     # check if DENM is for this truck or not
     if assigned_truck == truck_id:
@@ -227,6 +232,7 @@ def on_message(client, userdata, msg):
         longitude = message["fields"]["denm"]["management"]["eventPosition"]["longitude"]
 
         global queue_truck1, queue_truck2, queue_truck3
+        global need_route_recalculation_truck1, need_route_recalculation_truck2, need_route_recalculation_truck3
 
         # append the garbage container to the queue
         if truck_id == 1:
@@ -310,7 +316,7 @@ while (True):
         # Truck received a DENM message and needs to interrupt the default route to go empty a garbage container
         print("Truck #1 is on a mission to a garbage container!!!")
         if not current_route_truck1 or need_route_recalculation_truck1:
-            current_route_truck1 = draw_route(queue_truck1)
+            current_route_truck1 = draw_route(queue_truck1, "1")
 
         waypoint = current_route_truck1.pop(0)
 
@@ -326,7 +332,7 @@ while (True):
     else:
         print("Truck #2 is on a mission to a garbage container!!!")
         if not current_route_truck2 or need_route_recalculation_truck2:
-            current_route_truck2 = draw_route(queue_truck2)
+            current_route_truck2 = draw_route(queue_truck2, "2")
 
         waypoint = current_route_truck2.pop(0)
 
@@ -342,7 +348,7 @@ while (True):
     else:
         print("Truck #3 is on a mission to a garbage container!!!")
         if not current_route_truck3 or need_route_recalculation_truck3:
-            current_route_truck3 = draw_route(queue_truck3)
+            current_route_truck3 = draw_route(queue_truck3, "3")
 
         waypoint = current_route_truck3.pop(0)
 
