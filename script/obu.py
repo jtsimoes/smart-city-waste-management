@@ -168,29 +168,33 @@ def draw_route(points, route_id):
     # - 100,000 requests per month
     #
 
-    print(f"NUMBER OF POINTS: {len(points)}")
-    print(f"POINTS: {points}")
+    # print(f"NUMBER OF POINTS: {len(points)}")
+    # print(f"POINTS: {points}")
 
-    if len(points) < 2:     # TODO: check
-        return points
+    # add the truck position to the points array
+    points.insert(0, truck_positions[int(route_id) - 1])
+
+    # if len(points) < 2:     # TODO: check
+    #    print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nREBENTOU\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+    #    return points
 
     if len(points) > 25:
-        print("\nERROR: You can only request directions for up to 25 points at a time.")
-        exit()
+        print("\n\n\nERROR: You can only request directions for up to 25 points at a time.")
+        return []
 
     point_strings = [
         f"{point[1]},{point[0]}" for point in points if point is not None]
     points_url = ";".join(point_strings)
 
-    print(f"POINTS URL: {points_url}")
+    # print(f"POINTS URL: {points_url}")
 
-    request_url = f"https://api.mapbox.com/directions/v5/mapbox/driving-traffic/{points_url}?geometries=geojson&overview=full&access_token={ACCESS_TOKEN}"
+    request_url = f"https://api.mapbox.com/directions/v5/mapbox/driving/{points_url}?geometries=geojson&overview=full&access_token={ACCESS_TOKEN}"
     response = requests.get(request_url)
     data = json.loads(response.text)
 
     if response.status_code != 200 or not data["routes"]:
-        print("\nERROR:", data["message"])
-        exit()
+        print("\n\n\nERROR:", data["message"])
+        return []
 
     route_geometry = data["routes"][0]["geometry"]["coordinates"]
     route_geometry = [[lon, lat] for lat, lon in route_geometry]
@@ -205,10 +209,10 @@ def draw_route(points, route_id):
     # print("\n - Route:", route_geometry)
 
     with open(f"../dashboard/static/route_obu{route_id}.json", "w") as file:
-        json.dump({"geometry": route_geometry}, file)
+        json.dump({"geometry": route_geometry,
+                  "duration": route_duration, "distance": route_distance}, file)
 
-    # return {"distance": route_distance, "duration": route_duration, "geometry": route_geometry}
-    print(f"\n\n\nGENERATED ROUTE FOR TRUCK #{route_id}\n\n\n")
+    # print(f"\n\n\nGENERATED ROUTE FOR TRUCK #{route_id}\n\n\n")
     return route_geometry
 
 
@@ -272,7 +276,7 @@ def generate(client, station_id, latitude, longitude):
     client.publish("vanetza/in/cam", m)
     # Update the current position of the truck
     truck_positions[station_id - 1] = [latitude, longitude]
-    #print("publishing")
+    # print("publishing")
     # print(m)
     f.close()
     time.sleep(0.3)
@@ -306,7 +310,7 @@ while (True):
     ##### TRUCK #1 #####
     if not queue_truck1:
         # Truck don't have any garbage container assigned to it, so it can follow the default route
-        print("Truck is driving on the default route")
+        print("Truck #1 is driving on the default route")
         if step_truck1 < len(DEFAULT_ROUTE_TRUCK1):
             waypoint = DEFAULT_ROUTE_TRUCK1[step_truck1]
             step_truck1 += 1
@@ -324,6 +328,7 @@ while (True):
 
     ##### TRUCK #2 #####
     if not queue_truck2:
+        print("Truck #2 is driving on the default route")
         if step_truck2 < len(DEFAULT_ROUTE_TRUCK2):
             waypoint = DEFAULT_ROUTE_TRUCK2[step_truck2]
             step_truck2 += 1
@@ -341,6 +346,7 @@ while (True):
     ##### TRUCK #3 #####
     if not queue_truck3:
         if step_truck3 < len(DEFAULT_ROUTE_TRUCK3):
+            print("Truck #3 is driving on the default route")
             waypoint = DEFAULT_ROUTE_TRUCK3[step_truck3]
             step_truck3 += 1
         else:
