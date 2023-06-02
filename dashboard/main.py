@@ -25,7 +25,6 @@ GARBAGE_COORDINATES = [
     [40.643134410404926, -8.648936101882537],
     [40.643307022480656, -8.650936085405435],
     [40.6431164299547, -8.64649536369701],
-    [40.643817663924374, -8.64685555030303],
     [40.64398667818958, -8.646931379062192],
     [40.64408017525881, -8.648301036024554],
     [40.64390396913453, -8.650073533269968],
@@ -44,7 +43,6 @@ GARBAGE_COORDINATES = [
     [40.644937323766214, -8.647352861401957],
     [40.64377753669243, -8.647725247479249],
     [40.64468434076897, -8.648903026700445],
-    [40.64482233161361, -8.6481409342632],
     [40.64457263368578, -8.647205638999306],
     [40.642739296607445, -8.647339871189958],
 ]
@@ -61,7 +59,7 @@ async def truck(truck_id: int):
     path = f'static/out_cam_obu{truck_id}.json'
     if not os.path.isfile(path):
         raise HTTPException(status_code=404, detail="File not found")
-    
+
     with open(path) as out_cam:
         data = json.load(out_cam)
 
@@ -82,6 +80,19 @@ async def garbage():
                             1, "fill_percentage": int(fill_percentage)}
 
     return data
+
+
+@app.get("/route/{route_id}")
+async def route(route_id: int):
+
+    path = f'static/route_obu{route_id}.json'
+    if not os.path.isfile(path):
+        raise HTTPException(status_code=404, detail="File not found")
+
+    with open(path) as route:
+        data = json.load(route)
+
+    return {"geometry": data['geometry']}
 
 
 if __name__ == "__main__":
