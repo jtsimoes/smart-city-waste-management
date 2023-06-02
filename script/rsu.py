@@ -7,9 +7,6 @@ import math
 # Fill percentage at which the garbage container is considered full and needs to be emptied
 WARNING_PERCENTAGE = 70
 
-# Total number of sensors
-NUMBER_SENSORS = 7
-
 # Coordinates of all possible garbage containers
 garbage_coordinates = [
     [40.639089, -8.650802],
@@ -46,27 +43,28 @@ garbage_coordinates = [
 
 # List containing the most recent position of each truck
 truck_positions = [
-    [40.6317090, -8.6875641],
-    [40.6258137, -8.6448027],
-    [40.6397940, -8.6435776],
+    [None, None],
+    [None, None],
+    [None, None],
 ]
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
     client.subscribe("vanetza/out/cam")
-    #client.subscribe("vanetza/in/denm")
 
 
 def on_message(client, userdata, msg):
     message = json.loads(msg.payload.decode('utf-8'))
+
+    with open(f"../dashboard/static/out_cam_obu{message['stationID']}.json", "w") as file:
+        json.dump(message, file)
     
     print('Topic: ' + msg.topic)
     print('Message: ' + str(message)) # json.dumps(message)
-    print('Client: ' + client)
 
-    print("Latitude: " + message["latitude"])
-    print("Longitude: " + message["longitude"])
-    print("Truck id: " + message["stationID"])
+    print(f"Latitude: " + str(message["latitude"]))
+    print(f"Longitude: " + str(message["longitude"]))
+    print(f"Truck id: " + str(message["stationID"]))
 
     truck_positions[int(message["stationID"]) - 1] = [message["latitude"], message["longitude"]]
 
@@ -95,7 +93,7 @@ def generate(garbage_id, latitude, longitude):
 
     m = json.dumps(m)
     client.publish("vanetza/in/denm", m)
-    print("publishing")
+    #print("publishing")
     f.close()
 
 client = mqtt.Client()
@@ -120,4 +118,4 @@ while(True):
             with open("../sensor/sensor_data.txt", "w") as file:
                 file.writelines(data)
 
-            time.sleep(1)
+            time.sleep(0.3)
