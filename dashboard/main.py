@@ -9,7 +9,6 @@ import json
 import requests
 import datetime
 import os
-
 import time
 
 app = FastAPI(title="Smart City Waste Management", version="1.0")
@@ -92,7 +91,7 @@ async def route(route_id: int):
     with open(path) as route:
         data = json.load(route)
 
-    return {"geometry": data['geometry']}
+    return {"geometry": data['geometry'], "distance": data['distance'], "duration": data['duration']}
 
 
 if __name__ == "__main__":
