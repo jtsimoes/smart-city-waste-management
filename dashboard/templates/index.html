@@ -29,14 +29,14 @@
 
 <script>
     var map = L.map('map', {
-        center: [40.64496115472638, -8.649944858530267],
+        center: [40.64326115472638, -8.647944858530267],
         zoom: 17,
         minZoom: 14
     });
 
     L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}@2x?access_token={accessToken}', {
         attribution: '&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a> | &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        id: 'agoraaveiro/ckknd9qqr570617t6aegkail9',
+        id: 'agoraaveiro/clie4lqsf003u01pm1d9sgqfu',
         tileSize: 512,
         zoomOffset: -1,
         accessToken: 'pk.eyJ1IjoiYWdvcmFhdmVpcm8iLCJhIjoiY2trbmNoeXd5MXN2cTJudGRodzhjbjR6bSJ9.dvGHDz58mhv1i46hWJvEtQ',
@@ -54,51 +54,69 @@
         popupAnchor: [0, -10]
     });
 
-    var truck1 = L.marker([40.64486115472638, -8.653944858530267], { icon: truckIcon }).addTo(map).bindPopup("<b>Truck #1</b><br>(waiting)", { closeOnClick: false, autoClose: false }).openPopup();
-    var truck2 = L.marker([40.64576115472638, -8.651944858530267], { icon: truckIcon }).addTo(map).bindPopup("<b>Truck #2</b><br>(waiting)", { closeOnClick: false, autoClose: false });
-    var truck3 = L.marker([40.64426115472638, -8.651844858530267], { icon: truckIcon }).addTo(map).bindPopup("<b>Truck #3</b><br>(unloading)", { closeOnClick: false, autoClose: false });
+    var truck1 = L.marker([40.64486115472638, -8.653944858530267], { icon: truckIcon }).addTo(map).bindPopup("<b>Truck #1</b>", { closeOnClick: false, autoClose: false }).openPopup();
+    var truck2 = L.marker([40.64576115472638, -8.651944858530267], { icon: truckIcon }).addTo(map).bindPopup("<b>Truck #2</b>", { closeOnClick: false, autoClose: false });
+    var truck3 = L.marker([40.64426115472638, -8.651844858530267], { icon: truckIcon }).addTo(map).bindPopup("<b>Truck #3</b>", { closeOnClick: false, autoClose: false });
 
-    var garbage1 = L.marker([40.64496115472638, -8.648944858530267], { icon: garbageIcon }).addTo(map).bindPopup("<b>Garbage #1</b><br>(not full)", { closeOnClick: false, autoClose: false });
-    var garbage2 = L.marker([40.64596115472638, -8.647944858530267], { icon: garbageIcon }).addTo(map).bindPopup("<b>Garbage #2</b><br>(not full)", { closeOnClick: false, autoClose: false });
-    var garbage3 = L.marker([40.64696115472638, -8.646944858530267], { icon: garbageIcon }).addTo(map).bindPopup("<b>Garbage #3</b><br>(not full)", { closeOnClick: false, autoClose: false });
-    var garbage4 = L.marker([40.64796115472638, -8.644944858530267], { icon: garbageIcon }).addTo(map).bindPopup("<b>Garbage #4</b><br>(full)", { closeOnClick: false, autoClose: false });
+    {% for garbage_container in garbage_coordinates %}
+        var garbage{{ loop.index }} = L.marker([{{ garbage_container[0] }}, {{ garbage_container[1] }}], { icon: garbageIcon }).addTo(map).bindPopup("<b>Garbage #{{ loop.index }}</b><br>0% filled");
+    {% endfor %}
 
 
     //var trucks_layer = L.layerGroup([truck1, truck2, truck3]);
     var route_layer = L.layerGroup().addTo(map);
     //var garbage_layer = L.layerGroup([garbage1, garbage2, garbage3]);
 
-
-    // TODO: Temporary hardcoded positions
-    var positionsArray = [
-        [40.643778, -8.654130],
-        [40.643573, -8.653911],
-        [40.643361, -8.653643],
-        [40.643499, -8.653461],
-        [40.643597, -8.653343],
-        [40.643752, -8.653525],
-        [40.643907, -8.653708],
-        [40.643890, -8.653965]
-    ];
-
     const loop = setInterval(function () {
-    updateMarkerPosition(truck1).then(
-        function (value) {
-            if (value === false) {
+        updateMarkerPosition(truck1).then(
+            function (value) {
+                if (value === false) {
+                    clearInterval(loop);
+                } else {
+                    //updatePolylineRoute(truck1)
+                }
+            },
+            function (error) {
                 clearInterval(loop);
-            } else {
-                updatePolylineRoute(truck1)
             }
-        },
-        function (error) {
-            clearInterval(loop);
-        }
-    );
-    }, 5_000);
+        );
+        /*updateGarbagePercentage().then(
+            function (value) {
+                if (value === false) {
+                    clearInterval(loop);
+                }
+            },
+            function (error) {
+                clearInterval(loop);
+            }
+        );*/
+    }, 1000);
 
     async function updateMarkerPosition(marker) {
         try {
-            const response = await fetch('/truck/1');
+            const response = await fetch('/truck');
+            const data = await response.json();
+
+            if (response.ok) {
+                //console.log("Success:", data);
+
+                marker.setLatLng([data["latitude"], data["longitude"]]).update();
+                marker.setPopupContent("<b>Truck #" + data["id"] + "</b>").openPopup();
+
+                return true;
+            } else {
+                console.error("Error fetching truck id:", data["detail"]);
+                return false;
+            }
+        } catch (error) {
+            console.error("Error fetching truck position:", error);
+            return false;
+        }
+    }
+
+    async function updateGarbagePercentage() {
+        try {
+            const response = await fetch('/garbage');
             const data = await response.json();
 
             if (response.ok) {
@@ -129,7 +147,7 @@
                 route_layer.clearLayers();
                 var polyline = L.polyline(data["geometry"], { color: "red" }).bindPopup("<b>Distance:</b><br>" + data["distance"] + " km<br><b>ETA:</b><br>" + data["duration"], { closeOnClick: false, autoClose: false }).addTo(route_layer).openPopup();
                 map.fitBounds(polyline.getBounds());
-                
+
                 return true;
             } else {
                 console.error("Error fetching route:", data["detail"]);
@@ -140,12 +158,6 @@
             return false;
         }
     }
-
-    function onMapClick(e) {
-        alert("You clicked the map at " + e.latlng);
-    }
-
-    //map.on('click', onMapClick);
 
 </script>
 
