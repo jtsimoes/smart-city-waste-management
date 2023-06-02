@@ -54,12 +54,12 @@
         popupAnchor: [0, -10]
     });
 
-    var truck1 = L.marker([40.64486115472638, -8.653944858530267], { icon: truckIcon }).addTo(map).bindPopup("<b>Truck #1</b>", { closeOnClick: false, autoClose: false }).openPopup();
-    var truck2 = L.marker([40.64576115472638, -8.651944858530267], { icon: truckIcon }).addTo(map).bindPopup("<b>Truck #2</b>", { closeOnClick: false, autoClose: false });
-    var truck3 = L.marker([40.64426115472638, -8.651844858530267], { icon: truckIcon }).addTo(map).bindPopup("<b>Truck #3</b>", { closeOnClick: false, autoClose: false });
+    var truck1 = L.marker([0, 0], { icon: truckIcon }).addTo(map).bindPopup("<b>Truck #1</b>", { closeOnClick: false, autoClose: false });
+    var truck2 = L.marker([0, 0], { icon: truckIcon }).addTo(map).bindPopup("<b>Truck #2</b>", { closeOnClick: false, autoClose: false });
+    var truck3 = L.marker([0, 0], { icon: truckIcon }).addTo(map).bindPopup("<b>Truck #3</b>", { closeOnClick: false, autoClose: false });
 
     {% for garbage_container in garbage_coordinates %}
-        var garbage{{ loop.index }} = L.marker([{{ garbage_container[0] }}, {{ garbage_container[1] }}], { icon: garbageIcon }).addTo(map).bindPopup("<b>Garbage #{{ loop.index }}</b><br>0% filled");
+    var garbage{{ loop.index }} = L.marker([{{ garbage_container[0] }}, {{ garbage_container[1] }}], { icon: garbageIcon }).addTo(map).bindPopup("<b>Garbage #{{ loop.index }}</b><br>0% filled");
     {% endfor %}
 
 
@@ -68,7 +68,31 @@
     //var garbage_layer = L.layerGroup([garbage1, garbage2, garbage3]);
 
     const loop = setInterval(function () {
-        updateMarkerPosition(truck1).then(
+        updateMarkerPosition(truck1, "1").then(
+            function (value) {
+                if (value === false) {
+                    clearInterval(loop);
+                } else {
+                    //updatePolylineRoute(truck1)
+                }
+            },
+            function (error) {
+                clearInterval(loop);
+            }
+        );
+        updateMarkerPosition(truck2, "2").then(
+            function (value) {
+                if (value === false) {
+                    clearInterval(loop);
+                } else {
+                    //updatePolylineRoute(truck1)
+                }
+            },
+            function (error) {
+                clearInterval(loop);
+            }
+        );
+        updateMarkerPosition(truck3, "3").then(
             function (value) {
                 if (value === false) {
                     clearInterval(loop);
@@ -90,11 +114,11 @@
                 clearInterval(loop);
             }
         );*/
-    }, 1000);
+    }, 300);
 
-    async function updateMarkerPosition(marker) {
+    async function updateMarkerPosition(marker, truck) {
         try {
-            const response = await fetch('/truck');
+            const response = await fetch('/truck/' + truck);
             const data = await response.json();
 
             if (response.ok) {
@@ -123,7 +147,11 @@
                 console.log("Success:", data);
 
                 marker.setLatLng([data["latitude"], data["longitude"]]).update();
-                marker.setPopupContent("<b>Truck #" + data["id"] + "</b><br>(" + data["state"] + ")").openPopup();
+                if (data["percentage"] > 70) {
+                    marker.setPopupContent("<b>Truck #" + data["id"] + "</b><br>(" + data["percentage"] + "% filled)").openPopup();
+                } else {
+                    marker.setPopupContent("<b>Truck #" + data["id"] + "</b><br>(" + data["percentage"] + "% filled)");
+                }
 
                 return true;
             } else {

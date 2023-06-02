@@ -20,10 +20,8 @@ templates = Jinja2Templates(directory="templates")
 
 GARBAGE_COORDINATES = [
     [40.6420268056196, -8.651936077164848],
-    [40.64232528533871, -8.650319976735206],
     [40.64318475562894, -8.64835790759189],
     [40.64396869795805, -8.648609090356615],
-    [40.643975890057774, -8.647026165011145],
     [40.643134410404926, -8.648936101882537],
     [40.643307022480656, -8.650936085405435],
     [40.6431164299547, -8.64649536369701],
@@ -57,22 +55,20 @@ async def dashboard(request: Request):
     return templates.TemplateResponse("index.html", {"request": request, "garbage_coordinates": GARBAGE_COORDINATES})
 
 
-@app.get("/truck")
-async def truck():
+@app.get("/truck/{truck_id}")
+async def truck(truck_id: int):
 
-    path = 'static/out_cam_obu1.json'
+    path = f'static/out_cam_obu{truck_id}.json'
     if not os.path.isfile(path):
         raise HTTPException(status_code=404, detail="File not found")
     
     with open(path) as out_cam:
         data = json.load(out_cam)
 
-    #latitude = data['fields']['cam']['camParameters']['basicContainer']['referencePosition']['latitude']
-    #longitude = data['fields']['cam']['camParameters']['basicContainer']['referencePosition']['longitude']
     latitude = data['latitude']
     longitude = data['longitude']
 
-    return {"id": 1, "latitude": latitude, "longitude": longitude}
+    return {"id": truck_id, "latitude": latitude, "longitude": longitude}
 
 
 @app.get("/garbage")
