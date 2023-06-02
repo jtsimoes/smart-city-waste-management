@@ -7,7 +7,7 @@ services:
         cap_add:
             - "NET_ADMIN"
         environment:
-            - VANETZA_STATION_ID=3
+            - VANETZA_STATION_ID=1
             - VANETZA_STATION_TYPE=5
             - VANETZA_MAC_ADDRESS=6e:06:e0:03:00:11
             - VANETZA_INTERFACE=br0
@@ -27,7 +27,7 @@ services:
         cap_add:
             - "NET_ADMIN"
         environment:
-            - VANETZA_STATION_ID=4
+            - VANETZA_STATION_ID=2
             - VANETZA_STATION_TYPE=5
             - VANETZA_MAC_ADDRESS=6e:06:e0:03:00:12
             - VANETZA_INTERFACE=br0
@@ -47,7 +47,7 @@ services:
         cap_add:
             - "NET_ADMIN"
         environment:
-            - VANETZA_STATION_ID=5
+            - VANETZA_STATION_ID=3
             - VANETZA_STATION_TYPE=5
             - VANETZA_MAC_ADDRESS=6e:06:e0:03:00:13
             - VANETZA_INTERFACE=br0
@@ -67,7 +67,7 @@ services:
         cap_add:
             - "NET_ADMIN"
         environment:
-            - VANETZA_STATION_ID=1
+            - VANETZA_STATION_ID=5
             - VANETZA_STATION_TYPE=15
             - VANETZA_MAC_ADDRESS=6e:06:e0:03:00:01
             - VANETZA_INTERFACE=br0
