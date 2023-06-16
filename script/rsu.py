@@ -71,7 +71,7 @@ def generate(garbage_id, latitude, longitude):
     m["management"]["actionID"]["originatingStationID"] = garbage_id
     m["management"]["eventPosition"]["latitude"] = latitude
     m["management"]["eventPosition"]["longitude"] = longitude
-    #m["situation"]["eventType"]["causeCode"] = 50
+    m["situation"]["eventType"]["causeCode"] = 50
 
     # Set initial minimum distance to infinity
     min_distance = float("inf")
@@ -111,6 +111,7 @@ while(True):
             generate(sensor_id, GARBAGE_COORDINATES[sensor_id][0], GARBAGE_COORDINATES[sensor_id][1])
 
             data[sensor_id] = "0\n"
+            data[-1] = data[-1].strip("\n")
             with open("../sensor/sensor_data.txt", "w") as file:
                 file.writelines(data)
 
