@@ -44,7 +44,7 @@
 
     var truckIcon = L.icon({
         iconUrl: '{{ url_for("static", path="/truck.png") }}',
-        iconSize: [30, 30],
+        iconSize: [35, 35],
         popupAnchor: [0, -10]
     });
 
@@ -66,58 +66,41 @@
     var route2 = L.polyline([[0,0]], { color: "green" }).addTo(map).bindPopup("2");
     var route3 = L.polyline([[0,0]], { color: "blue" }).addTo(map).bindPopup("3");
 
-
-    //var trucks_layer = L.layerGroup([truck1, truck2, truck3]);
-    //var route_layer = L.layerGroup().addTo(map);
-    //var garbage_layer = L.layerGroup([garbage1, garbage2, garbage3]);
-
-    const loop = setInterval(function () {
+    setInterval(function () {
         updateMarkerPosition(truck1, "1").then(
             function (value) {
-                if (value === false) {
-                    clearInterval(loop);
-                } else {
-                    updatePolylineRoute(route1, "1");
+                if (value === true) {
+                    updatePolylineRoute(route1, "1").then(
+                        function (value) {
+                            if (value === false) route1.setLatLngs([[0, 0]]).closePopup();
+                        }
+                    );
                 }
-            },
-            function (error) {
-                clearInterval(loop);
             }
         );
         updateMarkerPosition(truck2, "2").then(
             function (value) {
-                if (value === false) {
-                    clearInterval(loop);
-                } else {
-                    updatePolylineRoute(route2, "2");
+                if (value === true) {
+                    updatePolylineRoute(route2, "2").then(
+                        function (value) {
+                            if (value === false) route2.setLatLngs([[0, 0]]).closePopup();
+                        }
+                    );
                 }
-            },
-            function (error) {
-                clearInterval(loop);
             }
         );
         updateMarkerPosition(truck3, "3").then(
             function (value) {
-                if (value === false) {
-                    clearInterval(loop);
-                } else {
-                    updatePolylineRoute(route3, "3");
+                if (value === true) {
+                    updatePolylineRoute(route3, "3").then(
+                        function (value) {
+                            if (value === false) route3.setLatLngs([[0, 0]]).closePopup();
+                        }
+                    );
                 }
-            },
-            function (error) {
-                clearInterval(loop);
             }
         );
-        updateGarbagePercentage().then(
-            function (value) {
-                if (value === false) {
-                    clearInterval(loop);
-                }
-            },
-            function (error) {
-                clearInterval(loop);
-            }
-        );
+        updateGarbagePercentage();
     }, 300);
 
     async function updateMarkerPosition(marker, truck) {
@@ -177,16 +160,11 @@
             const data = await response.json();
 
             if (response.ok) {
-                console.log("Success:", data);
+                //console.log("Success:", data);
 
-                //route_layer.clearLayers();
-                //var polyline = L.polyline(data["geometry"], { color: "red" }).bindPopup("<b>Distance:</b><br>" + data["distance"] + " km<br><b>ETA:</b><br>" + data["duration"], { closeOnClick: false, autoClose: false }).addTo(route_layer).openPopup();
-                
                 polyline.setLatLngs(data["geometry"]);
                 polyline.setPopupContent("Truck #" + route + " route<br><b>Distance:</b><br>" + data["distance"] + " km<br><b>ETA:</b><br>" + data["duration"]).openPopup();
                 
-                //map.fitBounds(polyline.getBounds());
-
                 return true;
             } else {
                 console.error("Error fetching route:", data["detail"]);
