@@ -1,9 +1,8 @@
 import random
 import time
+import os
+import json
 
-
-# Total number of sensors
-NUMBER_SENSORS = 26
 
 # Max capacity of the garbage container
 MAX_CAPACITY = 100
@@ -13,6 +12,16 @@ INITIAL_PERCENTAGE = 0
 
 # Fill percentage at which the garbage container is considered full and needs to be emptied
 WARNING_PERCENTAGE = 70
+
+# Get total number of sensors on garbage containers
+path = 'sensor_position.json'
+if not os.path.isfile(path):
+    raise FileNotFoundError("Garbage container coordinates file not found!")
+
+with open(path, "r") as file:
+    sensor_positions = json.load(file)
+
+NUMBER_SENSORS = len(sensor_positions['positions'])
 
 
 # Create a list of initial fill percentages for all sensors
@@ -69,4 +78,4 @@ while True:
     print("Sensor data updated.")
 
     # Simulate some delay between fill iterations
-    time.sleep(4)
+    time.sleep(10)
