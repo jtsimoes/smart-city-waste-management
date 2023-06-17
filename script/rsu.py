@@ -36,13 +36,15 @@ def on_message(client, userdata, msg):
     with open(f"../dashboard/static/out_cam_obu{message['stationID']}.json", "w") as file:
         json.dump(message, file)
     
-    print('Topic: ' + msg.topic)
-    print('Message: ' + str(message)) # json.dumps(message)
+    print(f"Topic: {msg.topic}")
+    #print(f"Message: {message}")
 
-    print(f"Latitude: " + str(message["latitude"]))
-    print(f"Longitude: " + str(message["longitude"]))
-    print(f"Truck id: " + str(message["stationID"]))
+    print(f"Latitude: {message['latitude']}")
+    print(f"Longitude: {message['longitude']}")
+    print(f"Truck id: {message['stationID']}")
+    print()
 
+    # Update truck current position
     truck_positions[int(message["stationID"]) - 1] = [message["latitude"], message["longitude"]]
 
 
@@ -60,6 +62,11 @@ def generate(garbage_id, latitude, longitude):
     # Find the nearest truck to collect garbage
     for (truck_id, truck_position) in enumerate(truck_positions):
         lat, lon = truck_position[0], truck_position[1]
+
+        # Don't generate a DENM message if the truck position is unknown
+        if lat == None or lon == None:
+            return False
+
         distance = math.dist((latitude, longitude), (lat, lon))
         
         if distance < min_distance:
@@ -67,11 +74,11 @@ def generate(garbage_id, latitude, longitude):
             nearest_truck = truck_id + 1
 
     m["situation"]["eventType"]["subCauseCode"] = nearest_truck
-
     m = json.dumps(m)
     client.publish("vanetza/in/denm", m)
     #print("publishing")
     f.close()
+    return True
 
 client = mqtt.Client()
 client.on_connect = on_connect
@@ -80,20 +87,23 @@ client.connect("192.168.98.10", 1883, 60)
 
 threading.Thread(target=client.loop_forever).start()
 
-while(True):
-    # read file and check if container is full
+while True:
+    # Read all sensor data and check if any garbage container is (almost) full
     with open("../sensor/sensor_data.txt", "r") as file:
         data = file.readlines()
 
     for (sensor_id, fill_percentage) in enumerate(data):
 
         if int(fill_percentage) > WARNING_PERCENTAGE:
-            # Generate denm
-            generate(sensor_id, GARBAGE_COORDINATES[sensor_id][0], GARBAGE_COORDINATES[sensor_id][1])
-
-            data[sensor_id] = "0\n"
-            data[-1] = data[-1].strip("\n")
-            with open("../sensor/sensor_data.txt", "w") as file:
-                file.writelines(data)
+            # If container is (almost) full, generate a DENM message
+            if generate(sensor_id, GARBAGE_COORDINATES[sensor_id][0], GARBAGE_COORDINATES[sensor_id][1]):
+                # If a DENM message was generated, reset the fill percentage of that garbage container
+                data[sensor_id] = "0\n"
+                data[-1] = data[-1].strip("\n")
+                with open("../sensor/sensor_data.txt", "w") as file:
+                    file.writelines(data)
+            else:
+                # If no DENM message was generated, wait for trucks to join the network
+                print("Currently there are no trucks to collect the garbage.")
 
             time.sleep(0.3)
