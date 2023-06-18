@@ -10,124 +10,14 @@ import os
 # Mapbox Directions API access token
 ACCESS_TOKEN = "pk.eyJ1IjoiYWdvcmFhdmVpcm8iLCJhIjoiY2trbmNoeXd5MXN2cTJudGRodzhjbjR6bSJ9.dvGHDz58mhv1i46hWJvEtQ"
 
-# Default route for the truck #1
-DEFAULT_ROUTE_TRUCK1 = [
-    [40.644069, -8.641142],
-    [40.644128, -8.641183],
-    [40.644144, -8.641241],
-    [40.644141, -8.64134],
-    [40.644113, -8.64148],
-    [40.64403,  -8.641896],
-    [40.643783, -8.643119],
-    [40.643753, -8.643253],
-    [40.643706, -8.643444],
-    [40.643679, -8.643518],
-    [40.643577, -8.644],
-    [40.643545, -8.644059],
-    [40.643513, -8.64425,],
-    [40.643411, -8.644824],
-    [40.643392, -8.644933],
-    [40.64336, -8.645092],
-    [40.643286, -8.645453],
-    [40.643199, -8.645899],
-    [40.643126, -8.646026],
-    [40.643038, -8.646486],
-    [40.643023, -8.646522],
-    [40.643005, -8.646542],
-    [40.642998, -8.646545],
-    [40.642921, -8.646581],
-    [40.642921, -8.646581],
-    [40.643269, -8.64489],
-    [40.643309, -8.644656],
-    [40.64337, -8.64435],
-    [40.643396, -8.644209],
-    [40.643433, -8.644063],
-    [40.643481, -8.643823],
-    [40.643537, -8.643489],
-    [40.643553, -8.643349],
-    [40.643571, -8.643184],
-    [40.643593, -8.643075],
-    [40.643813, -8.641978],
-    [40.643833, -8.641882],
-    [40.643925, -8.641426],
-    [40.643955, -8.641274],
-    [40.643985, -8.641187],
-    [40.644018, -8.641158],
-    [40.64406, -8.6411429]
-]
+# Home position of the truck #1
+HOME_TRUCK1 = [40.642050351865485, -8.646329251761603]  # Rotunda Monumento ao Paraquedista (https://goo.gl/maps/C5hhAGM1cUm3TDYq8)
 
-# Default route for the truck #2
-DEFAULT_ROUTE_TRUCK2 = [
-    [40.643709, -8.652005],
-    [40.643701, -8.652038],
-    [40.643546, -8.652467],
-    [40.64343, -8.652785],
-    [40.64317, -8.652661],
-    [40.643112, -8.652647],
-    [40.643069, -8.652657],
-    [40.642901, -8.652736],
-    [40.6428, -8.652335],
-    [40.642791, -8.652239],
-    [40.642803, -8.65213,],
-    [40.642932, -8.65186,],
-    [40.642975, -8.651725],
-    [40.643018, -8.651629],
-    [40.643032, -8.651597],
-    [40.643098, -8.651446],
-    [40.64322, -8.651169],
-    [40.643242, -8.651121],
-    [40.643278, -8.651042],
-    [40.643329, -8.65111,],
-    [40.643421, -8.651163],
-    [40.643892, -8.651455],
-    [40.643847, -8.65158,],
-    [40.643733, -8.651903],
-    [40.64371, -8.652001]
-]
+# Home position of the truck #2
+HOME_TRUCK2 = [40.64302876711141, -8.653112236802189]   # Igreja de Nossa Senhora da Apresentação (https://goo.gl/maps/L9veVFhzJ2Zi2LsG9)
 
-# Default route for the truck #3
-DEFAULT_ROUTE_TRUCK3 = [
-    [40.644186, -8.649034],
-    [40.644153, -8.649086],
-    [40.644146, -8.649099],
-    [40.644047, -8.649256],
-    [40.644019, -8.649295],
-    [40.644003, -8.649307],
-    [40.643989, -8.649314],
-    [40.643984, -8.649316],
-    [40.643978, -8.649317],
-    [40.643972, -8.649316],
-    [40.643966, -8.649316],
-    [40.643959, -8.649315],
-    [40.643954, -8.649314],
-    [40.643947, -8.649311],
-    [40.643866, -8.649237],
-    [40.643858, -8.649223],
-    [40.643851, -8.649205],
-    [40.643848, -8.649182],
-    [40.643847, -8.649155],
-    [40.643861, -8.649127],
-    [40.643891, -8.649001],
-    [40.643943, -8.648765],
-    [40.643972, -8.648629],
-    [40.643998, -8.648502],
-    [40.644016, -8.648412],
-    [40.644033, -8.648355],
-    [40.644057, -8.648325],
-    [40.644073, -8.648312],
-    [40.644106, -8.648312],
-    [40.644152, -8.648329],
-    [40.644355, -8.648403],
-    [40.644379, -8.648421],
-    [40.644393, -8.648449],
-    [40.644398, -8.648486],
-    [40.644338, -8.648794],
-    [40.644326, -8.648813],
-    [40.644284, -8.648881],
-    [40.644245, -8.648941],
-    [40.644234, -8.648959],
-    [40.644186, -8.649033]
-]
+# Home position of the truck #3
+HOME_TRUCK3 = [40.64556274792325, -8.64612107999697]    # Guarda Nacional Republicana (https://goo.gl/maps/fL8zMy575usCnSwx8)
 
 # Array containing the queue of garbage containers to be emptied by each truck
 queue_truck1 = []
@@ -144,11 +34,11 @@ need_route_recalculation_truck1 = False
 need_route_recalculation_truck2 = False
 need_route_recalculation_truck3 = False
 
-# Current position of each truck
+# Current position of each truck given by the CAM messages
 truck_positions = [
-    [None, None],
-    [None, None],
-    [None, None],
+    HOME_TRUCK1,
+    HOME_TRUCK2,
+    HOME_TRUCK3,
 ]
 
 
@@ -158,7 +48,7 @@ def sort_by_distance(queue, truck_position):
 
 
 # Draw the route between the truck and the next garbage container(s)
-def draw_route(points, route_id):
+def draw_route(points, route_id, output_to_file=True):
     #
     # Mapbox Directions API
     # https://docs.mapbox.com/api/navigation/directions/
@@ -194,18 +84,18 @@ def draw_route(points, route_id):
     route_geometry = [[lon, lat] for lat, lon in route_geometry]
     ### print(f"\nAFTER: {route_geometry}\n")
 
-    route_distance = round(data["routes"][0]["distance"] / 1000, 2)
+    if output_to_file:
 
-    route_duration = str(datetime.timedelta(
-        seconds=round(data["routes"][0]["duration"])))
+        route_distance = round(data["routes"][0]["distance"] / 1000, 2)
 
-    # print("\n - Distance:", route_distance, "km")
-    # print("\n - ETA:", route_duration)
-    # print("\n - Route:", route_geometry)
+        route_duration = str(datetime.timedelta(seconds = round(data["routes"][0]["duration"])))
 
-    with open(f"../dashboard/static/route_obu{route_id}.json", "w") as file:
-        json.dump({"geometry": route_geometry,
-                  "duration": route_duration, "distance": route_distance}, file)
+        # print("\n - Distance:", route_distance, "km")
+        # print("\n - ETA:", route_duration)
+        # print("\n - Route:", route_geometry)
+
+        with open(f"../dashboard/static/route_obu{route_id}.json", "w") as file:
+            json.dump({"geometry": route_geometry, "duration": route_duration, "distance": route_distance}, file)
 
     return route_geometry
 
@@ -295,24 +185,26 @@ threading.Thread(target=client1.loop_forever).start()
 threading.Thread(target=client2.loop_forever).start()
 threading.Thread(target=client3.loop_forever).start()
 
-step_truck1 = 0
-step_truck2 = 0
-step_truck3 = 0
+time.sleep(0.5)
 
 while True:
 
     ##### TRUCK #1 #####
     if not queue_truck1 and not current_route_truck1:
-        # Truck don't have any garbage container assigned to it, so it can follow the default route
-        print("Truck #1 is driving on the default route")
-        if step_truck1 < len(DEFAULT_ROUTE_TRUCK1):
-            waypoint = DEFAULT_ROUTE_TRUCK1[step_truck1]
-            step_truck1 += 1
+        # Truck don't have any garbage container assigned to it, so it can go/stay at home
+        if truck_positions[0] == HOME_TRUCK1:
+            # Truck is already at home, can stay in the same position
+            waypoint = HOME_TRUCK1
+            print("Truck #1 is at home waiting for a mission")
         else:
-            step_truck1 = 0
+            # Truck is not at home yet, needs to generate a route to go back home
+            queue_truck1 = [HOME_TRUCK1]
+            current_route_truck1 = draw_route([HOME_TRUCK1], "1", False)
+            waypoint = current_route_truck1.pop(0)
+            print("Truck #1 is going home")
     else:
         # Truck received a DENM message and needs to interrupt the default route to go empty a garbage container
-        print("Truck #1 is on a mission to a garbage container!!!")
+        print("Truck #1 is on the road!!!")
         print(len(current_route_truck1))
         print(need_route_recalculation_truck1)
         if not current_route_truck1 or need_route_recalculation_truck1:
@@ -326,7 +218,8 @@ while True:
             # Route is finished, clear all the garbage containers from the queue
             queue_truck1 = []
             # Delete truck route from the map
-            os.remove("../dashboard/static/route_obu1.json")
+            if os.path.exists("../dashboard/static/route_obu1.json"):
+                os.remove("../dashboard/static/route_obu1.json")
 
     # Publish the next move of the truck
     generate(client1, 1, waypoint[0], waypoint[1])
@@ -334,14 +227,19 @@ while True:
 
     ##### TRUCK #2 #####
     if not queue_truck2 and not current_route_truck2:
-        print("Truck #2 is driving on the default route")
-        if step_truck2 < len(DEFAULT_ROUTE_TRUCK2):
-            waypoint = DEFAULT_ROUTE_TRUCK2[step_truck2]
-            step_truck2 += 1
+        # Truck don't have any garbage container assigned to it, so it can go/stay at home
+        if truck_positions[1] == HOME_TRUCK2:
+            # Truck is already at home, can stay in the same position
+            waypoint = HOME_TRUCK2
+            print("Truck #2 is at home waiting for a mission")
         else:
-            step_truck2 = 0
+            # Truck is not at home yet, needs to generate a route to go back home
+            queue_truck2 = [HOME_TRUCK2]
+            current_route_truck2 = draw_route([HOME_TRUCK2], "2", False)
+            waypoint = current_route_truck2.pop(0)
+            print("Truck #2 is going home")
     else:
-        print("Truck #2 is on a mission to a garbage container!!!")
+        print("Truck #2 is on the road!!!")
         print(len(current_route_truck2))
         print(need_route_recalculation_truck2)
         if not current_route_truck2 or need_route_recalculation_truck2:
@@ -355,7 +253,8 @@ while True:
             # Route is finished, clear all the garbage containers from the queue
             queue_truck2 = []
             # Delete truck route from the map
-            os.remove("../dashboard/static/route_obu2.json")
+            if os.path.exists("../dashboard/static/route_obu2.json"):
+                os.remove("../dashboard/static/route_obu2.json")
 
     # Publish the next move of the truck
     generate(client2, 2, waypoint[0], waypoint[1])
@@ -363,14 +262,19 @@ while True:
 
     ##### TRUCK #3 #####
     if not queue_truck3 and not current_route_truck3:
-        if step_truck3 < len(DEFAULT_ROUTE_TRUCK3):
-            print("Truck #3 is driving on the default route")
-            waypoint = DEFAULT_ROUTE_TRUCK3[step_truck3]
-            step_truck3 += 1
+        # Truck don't have any garbage container assigned to it, so it can go/stay at home
+        if truck_positions[2] == HOME_TRUCK3:
+            # Truck is already at home, can stay in the same position
+            waypoint = HOME_TRUCK3
+            print("Truck #3 is at home waiting for a mission")
         else:
-            step_truck3 = 0
+            # Truck is not at home yet, needs to generate a route to go back home
+            queue_truck3 = [HOME_TRUCK3]
+            current_route_truck3 = draw_route([HOME_TRUCK3], "3", False)
+            waypoint = current_route_truck3.pop(0)
+            print("Truck #3 is going home")
     else:
-        print("Truck #3 is on a mission to a garbage container!!!")
+        print("Truck #3 is on the road!!!")
         print(len(current_route_truck3))
         print(need_route_recalculation_truck3)
         if not current_route_truck3 or need_route_recalculation_truck3:
@@ -384,7 +288,8 @@ while True:
             # Route is finished, clear all the garbage containers from the queue
             queue_truck3 = []
             # Delete truck route from the map
-            os.remove("../dashboard/static/route_obu3.json")
+            if os.path.exists("../dashboard/static/route_obu3.json"):
+                os.remove("../dashboard/static/route_obu3.json")
 
     # Publish the next move of the truck
     generate(client3, 3, waypoint[0], waypoint[1])
