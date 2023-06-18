@@ -5,6 +5,7 @@ import time
 import requests
 import datetime
 import math
+import os
 
 # Mapbox Directions API access token
 ACCESS_TOKEN = "pk.eyJ1IjoiYWdvcmFhdmVpcm8iLCJhIjoiY2trbmNoeXd5MXN2cTJudGRodzhjbjR6bSJ9.dvGHDz58mhv1i46hWJvEtQ"
@@ -168,25 +169,17 @@ def draw_route(points, route_id):
     # - 100,000 requests per month
     #
 
-    # print(f"NUMBER OF POINTS: {len(points)}")
-    # print(f"POINTS: {points}")
+    ### print(f"NUMBER OF POINTS: {len(points)}")
+    ### print(f"POINTS: {points}")
 
     # add the truck position to the points array
     points.insert(0, truck_positions[int(route_id) - 1])
-
-    # if len(points) < 2:     # TODO: check
-    #    print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nREBENTOU\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
-    #    return points
-
-    if len(points) > 25:
-        print("\n\n\nERROR: You can only request directions for up to 25 points at a time.")
-        return []
 
     point_strings = [
         f"{point[1]},{point[0]}" for point in points if point is not None]
     points_url = ";".join(point_strings)
 
-    # print(f"POINTS URL: {points_url}")
+    ### print(f"POINTS URL: {points_url}")
 
     request_url = f"https://api.mapbox.com/directions/v5/mapbox/driving/{points_url}?geometries=geojson&overview=full&access_token={ACCESS_TOKEN}"
     response = requests.get(request_url)
@@ -194,10 +187,12 @@ def draw_route(points, route_id):
 
     if response.status_code != 200 or not data["routes"]:
         print("\n\n\nERROR:", data["message"])
-        return []
+        exit()
 
     route_geometry = data["routes"][0]["geometry"]["coordinates"]
+    ### print(f"\nBEFORE: {route_geometry}\n")
     route_geometry = [[lon, lat] for lat, lon in route_geometry]
+    ### print(f"\nAFTER: {route_geometry}\n")
 
     route_distance = round(data["routes"][0]["distance"] / 1000, 2)
 
@@ -212,7 +207,6 @@ def draw_route(points, route_id):
         json.dump({"geometry": route_geometry,
                   "duration": route_duration, "distance": route_distance}, file)
 
-    # print(f"\n\n\nGENERATED ROUTE FOR TRUCK #{route_id}\n\n\n")
     return route_geometry
 
 
@@ -274,12 +268,12 @@ def generate(client, station_id, latitude, longitude):
     m["longitude"] = longitude
     m = json.dumps(m)
     client.publish("vanetza/in/cam", m)
+
     # Update the current position of the truck
     truck_positions[station_id - 1] = [latitude, longitude]
+
     # print("publishing")
-    # print(m)
     f.close()
-    time.sleep(0.3)
 
 
 client1 = mqtt.Client()
@@ -305,10 +299,10 @@ step_truck1 = 0
 step_truck2 = 0
 step_truck3 = 0
 
-while (True):
+while True:
 
     ##### TRUCK #1 #####
-    if not queue_truck1:
+    if not queue_truck1 and not current_route_truck1:
         # Truck don't have any garbage container assigned to it, so it can follow the default route
         print("Truck #1 is driving on the default route")
         if step_truck1 < len(DEFAULT_ROUTE_TRUCK1):
@@ -319,15 +313,27 @@ while (True):
     else:
         # Truck received a DENM message and needs to interrupt the default route to go empty a garbage container
         print("Truck #1 is on a mission to a garbage container!!!")
+        print(len(current_route_truck1))
+        print(need_route_recalculation_truck1)
         if not current_route_truck1 or need_route_recalculation_truck1:
+            need_route_recalculation_truck1 = False
             current_route_truck1 = draw_route(queue_truck1, "1")
 
         waypoint = current_route_truck1.pop(0)
 
+        if not current_route_truck1:
+            print("\nTruck #1 finished route\n")
+            # Route is finished, clear all the garbage containers from the queue
+            queue_truck1 = []
+            # Delete truck route from the map
+            os.remove("../dashboard/static/route_obu1.json")
+
+    # Publish the next move of the truck
     generate(client1, 1, waypoint[0], waypoint[1])
+    time.sleep(0.3)
 
     ##### TRUCK #2 #####
-    if not queue_truck2:
+    if not queue_truck2 and not current_route_truck2:
         print("Truck #2 is driving on the default route")
         if step_truck2 < len(DEFAULT_ROUTE_TRUCK2):
             waypoint = DEFAULT_ROUTE_TRUCK2[step_truck2]
@@ -336,15 +342,27 @@ while (True):
             step_truck2 = 0
     else:
         print("Truck #2 is on a mission to a garbage container!!!")
+        print(len(current_route_truck2))
+        print(need_route_recalculation_truck2)
         if not current_route_truck2 or need_route_recalculation_truck2:
+            need_route_recalculation_truck2 = False
             current_route_truck2 = draw_route(queue_truck2, "2")
 
         waypoint = current_route_truck2.pop(0)
 
+        if not current_route_truck2:
+            print("\nTruck #2 finished route\n")
+            # Route is finished, clear all the garbage containers from the queue
+            queue_truck2 = []
+            # Delete truck route from the map
+            os.remove("../dashboard/static/route_obu2.json")
+
+    # Publish the next move of the truck
     generate(client2, 2, waypoint[0], waypoint[1])
+    time.sleep(0.3)
 
     ##### TRUCK #3 #####
-    if not queue_truck3:
+    if not queue_truck3 and not current_route_truck3:
         if step_truck3 < len(DEFAULT_ROUTE_TRUCK3):
             print("Truck #3 is driving on the default route")
             waypoint = DEFAULT_ROUTE_TRUCK3[step_truck3]
@@ -353,9 +371,22 @@ while (True):
             step_truck3 = 0
     else:
         print("Truck #3 is on a mission to a garbage container!!!")
+        print(len(current_route_truck3))
+        print(need_route_recalculation_truck3)
         if not current_route_truck3 or need_route_recalculation_truck3:
+            need_route_recalculation_truck3 = False
             current_route_truck3 = draw_route(queue_truck3, "3")
 
         waypoint = current_route_truck3.pop(0)
 
+        if not current_route_truck3:
+            print("\nTruck #3 finished route\n")
+            # Route is finished, clear all the garbage containers from the queue
+            queue_truck3 = []
+            # Delete truck route from the map
+            os.remove("../dashboard/static/route_obu3.json")
+
+    # Publish the next move of the truck
     generate(client3, 3, waypoint[0], waypoint[1])
+    time.sleep(0.3)
+    print()
