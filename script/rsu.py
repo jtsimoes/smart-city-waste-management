@@ -42,6 +42,7 @@ total_assigned_garbage_count = 0
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
+    print()
     client.subscribe("vanetza/out/cam")
 
 
@@ -51,12 +52,11 @@ def on_message(client, userdata, msg):
     with open(f"../dashboard/static/out_cam_obu{message['stationID']}.json", "w") as file:
         json.dump(message, file)
     
-    print(f"Topic: {msg.topic}")
+    print(f"Message received in the topic: {msg.topic}")
     #print(f"Message: {message}")
 
-    print(f"Latitude: {message['latitude']}")
-    print(f"Longitude: {message['longitude']}")
-    print(f"Truck id: {message['stationID']}")
+    print(f"Truck id: #{message['stationID']}")
+    print(f"Truck coordinates: {(message['latitude'], message['longitude'])}")
     print()
 
     # Update truck current position
@@ -66,7 +66,7 @@ def on_message(client, userdata, msg):
 def generate(garbage_id, latitude, longitude):
     f = open('./vanetza/examples/in_denm.json')
     m = json.load(f)
-    m["management"]["actionID"]["originatingStationID"] = garbage_id
+    m["management"]["actionID"]["originatingStationID"] = garbage_id + 1
     m["management"]["eventPosition"]["latitude"] = latitude
     m["management"]["eventPosition"]["longitude"] = longitude
     m["situation"]["eventType"]["causeCode"] = 50
