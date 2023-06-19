@@ -48,10 +48,10 @@ while True:
             # Maximum rate at which the container can be filled per iteration
             # Slower fill rate while the garbage container is full or almost full
             max_fill_rate = 2
-            print(f"Garbage container #{sensor_id + 1} needs to be emptied!")
+            print(f"\033[93mGarbage container #{sensor_id + 1} needs to be emptied!\033[0m")
         else:
             # Faster fill rate while the garbage container is less full than the chosen warning percentage
-            max_fill_rate = 15
+            max_fill_rate = 30
 
         # Randomly generate a fill rate for the garbage container
         fill_rate = random.uniform(0, max_fill_rate)
@@ -60,7 +60,7 @@ while True:
         if fill_percentage > MAX_CAPACITY:
             # Prevent the garbage container from overflowing when completely full
             fill_percentage = MAX_CAPACITY
-            print(f"(!) GARBAGE CONTAINER #{sensor_id + 1} COMPLETLY FULL (!)")
+            print(f"\033[1m\033[91mGarbage container #{sensor_id + 1} is completely full!\033[0m")
 
         fill_percentage = round(fill_percentage)
 
@@ -78,4 +78,4 @@ while True:
     print("Sensor data updated.")
 
     # Simulate some delay between fill iterations
-    time.sleep(10)
+    time.sleep(15)
