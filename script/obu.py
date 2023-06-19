@@ -164,7 +164,7 @@ def on_message(client, userdata, msg):
 
 
 def generate(client, station_id, latitude, longitude):
-    f = open("./vanetza/examples/in_cam.json")
+    f = open("in_cam.json")
     m = json.load(f)
     m["stationID"] = station_id
     m["latitude"] = latitude

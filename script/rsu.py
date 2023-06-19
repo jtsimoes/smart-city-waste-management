@@ -64,7 +64,7 @@ def on_message(client, userdata, msg):
 
 
 def generate(garbage_id, latitude, longitude):
-    f = open('./vanetza/examples/in_denm.json')
+    f = open('in_denm.json')
     m = json.load(f)
     m["management"]["actionID"]["originatingStationID"] = garbage_id + 1
     m["management"]["eventPosition"]["latitude"] = latitude
