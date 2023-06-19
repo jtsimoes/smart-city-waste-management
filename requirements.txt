@@ -1,0 +1,6 @@
+asn1tools==0.166.0
+fastapi==0.97.0
+paho_mqtt==1.6.1
+Requests==2.31.0
+rticonnextdds_connector==1.2.2
+uvicorn==0.22.0
