@@ -42,6 +42,15 @@ truck_positions = [
 ]
 
 
+# Delete old truck routes from the map
+if os.path.exists("../dashboard/static/route_obu1.json"):
+    os.remove("../dashboard/static/route_obu1.json")
+if os.path.exists("../dashboard/static/route_obu2.json"):
+    os.remove("../dashboard/static/route_obu2.json")
+if os.path.exists("../dashboard/static/route_obu3.json"):
+    os.remove("../dashboard/static/route_obu3.json")
+
+
 # Sort the garbage containers by distance to the truck
 def sort_by_distance(queue, truck_position):
     return sorted(queue, key=lambda x: math.dist(x, truck_position))
@@ -49,6 +58,13 @@ def sort_by_distance(queue, truck_position):
 
 # Draw the route between the truck and the next garbage container(s)
 def draw_route(points, route_id, output_to_file=True):
+    # Add the truck current position to the beginning of the points array
+    points.insert(0, truck_positions[int(route_id) - 1])
+
+    point_strings = [
+        f"{point[1]},{point[0]}" for point in points if point is not None]
+    points_url = ";".join(point_strings)
+
     #
     # Mapbox Directions API
     # https://docs.mapbox.com/api/navigation/directions/
@@ -58,19 +74,6 @@ def draw_route(points, route_id, output_to_file=True):
     # - 300 requests per minute
     # - 100,000 requests per month
     #
-
-    ### print(f"NUMBER OF POINTS: {len(points)}")
-    ### print(f"POINTS: {points}")
-
-    # add the truck position to the points array
-    points.insert(0, truck_positions[int(route_id) - 1])
-
-    point_strings = [
-        f"{point[1]},{point[0]}" for point in points if point is not None]
-    points_url = ";".join(point_strings)
-
-    ### print(f"POINTS URL: {points_url}")
-
     request_url = f"https://api.mapbox.com/directions/v5/mapbox/driving/{points_url}?geometries=geojson&overview=full&access_token={ACCESS_TOKEN}"
     response = requests.get(request_url)
     data = json.loads(response.text)
@@ -80,20 +83,24 @@ def draw_route(points, route_id, output_to_file=True):
         exit()
 
     route_geometry = data["routes"][0]["geometry"]["coordinates"]
-    ### print(f"\nBEFORE: {route_geometry}\n")
-    route_geometry = [[lon, lat] for lat, lon in route_geometry]
-    ### print(f"\nAFTER: {route_geometry}\n")
 
+    # Reverse the order of the coordinates to match Leaflet's format
+    route_geometry = [[lon, lat] for lat, lon in route_geometry]
+
+    # Home route is not outputted to a file, only the route to the garbage containers
     if output_to_file:
 
+        # Convert distance from meters to kilometers and round to 2 decimal places
         route_distance = round(data["routes"][0]["distance"] / 1000, 2)
 
+        # Convert duration from seconds to a human readable format
         route_duration = str(datetime.timedelta(seconds = round(data["routes"][0]["duration"])))
 
         # print("\n - Distance:", route_distance, "km")
         # print("\n - ETA:", route_duration)
         # print("\n - Route:", route_geometry)
 
+        # Write the route to a file to be displayed on the dashboard map
         with open(f"../dashboard/static/route_obu{route_id}.json", "w") as file:
             json.dump({"geometry": route_geometry, "duration": route_duration, "distance": route_distance}, file)
 
@@ -102,14 +109,16 @@ def draw_route(points, route_id, output_to_file=True):
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
+    print()
     client.subscribe("vanetza/out/denm")
 
 
 def on_message(client, userdata, msg):
     message = json.loads(msg.payload.decode('utf-8'))
 
-    print('Topic: ' + msg.topic)
-    print('Message' + str(message))
+    print()
+    print(f"Message received in the topic: {msg.topic}")
+    #print(f"Message: {message}")
 
     assigned_truck = message["fields"]["denm"]["situation"]["eventType"]["subCauseCode"]
     truck_id = message["receiverID"]
@@ -118,6 +127,10 @@ def on_message(client, userdata, msg):
     if assigned_truck == truck_id:
         latitude = message["fields"]["denm"]["management"]["eventPosition"]["latitude"]
         longitude = message["fields"]["denm"]["management"]["eventPosition"]["longitude"]
+
+        print(f"Nearest truck: #{assigned_truck}")
+        print(f"Garbage container id: #{message['fields']['denm']['management']['actionID']['originatingStationID']}")
+        print(f"Garbage container coordinates: {(latitude, longitude)}")
 
         global queue_truck1, queue_truck2, queue_truck3
         global need_route_recalculation_truck1, need_route_recalculation_truck2, need_route_recalculation_truck3
@@ -195,26 +208,25 @@ while True:
         if math.dist(HOME_TRUCK1, truck_positions[0]) < 0.0001:
             # Truck is already at home, can stay in the same position
             waypoint = HOME_TRUCK1
-            print("Truck #1 is at home waiting for a mission")
+            print("\033[96mTruck #1 is at home waiting for a mission...\033[0m")
         else:
             # Truck is not at home yet, needs to generate a route to go back home
             queue_truck1 = [HOME_TRUCK1]
             current_route_truck1 = draw_route([HOME_TRUCK1], "1", False)
             waypoint = current_route_truck1.pop(0)
-            print("Truck #1 is going home")
+            print("\033[92mTruck #1 is going home!\033[0m")
     else:
         # Truck received a DENM message and needs to interrupt the default route to go empty a garbage container
-        print("Truck #1 is on the road!!!")
-        print(len(current_route_truck1))
-        print(need_route_recalculation_truck1)
+        print("\033[1m\033[33mTruck #1 is on the road!!!\033[0m")
         if not current_route_truck1 or need_route_recalculation_truck1:
             need_route_recalculation_truck1 = False
             current_route_truck1 = draw_route(queue_truck1, "1")
 
+        print(f"\033[90mWaypoints remaining for truck #1 route: {len(current_route_truck1)}\033[0m")
         waypoint = current_route_truck1.pop(0)
 
         if not current_route_truck1:
-            print("\nTruck #1 finished route\n")
+            print("\n\033[04mTruck #1 finished route\033[0m\n")
             # Route is finished, clear all the garbage containers from the queue
             queue_truck1 = []
             # Delete truck route from the map
@@ -231,25 +243,24 @@ while True:
         if math.dist(HOME_TRUCK2, truck_positions[1]) < 0.0001:
             # Truck is already at home, can stay in the same position
             waypoint = HOME_TRUCK2
-            print("Truck #2 is at home waiting for a mission")
+            print("\033[96mTruck #2 is at home waiting for a mission...\033[0m")
         else:
             # Truck is not at home yet, needs to generate a route to go back home
             queue_truck2 = [HOME_TRUCK2]
             current_route_truck2 = draw_route([HOME_TRUCK2], "2", False)
             waypoint = current_route_truck2.pop(0)
-            print("Truck #2 is going home")
+            print("\033[92mTruck #2 is going home!\033[0m")
     else:
-        print("Truck #2 is on the road!!!")
-        print(len(current_route_truck2))
-        print(need_route_recalculation_truck2)
+        print("\033[1m\033[33mTruck #2 is on the road!!!\033[0m")
         if not current_route_truck2 or need_route_recalculation_truck2:
             need_route_recalculation_truck2 = False
             current_route_truck2 = draw_route(queue_truck2, "2")
 
+        print(f"\033[90mWaypoints remaining for truck #2 route: {len(current_route_truck2)}\033[0m")
         waypoint = current_route_truck2.pop(0)
 
         if not current_route_truck2:
-            print("\nTruck #2 finished route\n")
+            print("\n\033[04mTruck #2 finished route\033[0m\n")
             # Route is finished, clear all the garbage containers from the queue
             queue_truck2 = []
             # Delete truck route from the map
@@ -266,25 +277,24 @@ while True:
         if math.dist(HOME_TRUCK3, truck_positions[2]) < 0.0001:
             # Truck is already at home, can stay in the same position
             waypoint = HOME_TRUCK3
-            print("Truck #3 is at home waiting for a mission")
+            print("\033[96mTruck #3 is at home waiting for a mission...\033[0m")
         else:
             # Truck is not at home yet, needs to generate a route to go back home
             queue_truck3 = [HOME_TRUCK3]
             current_route_truck3 = draw_route([HOME_TRUCK3], "3", False)
             waypoint = current_route_truck3.pop(0)
-            print("Truck #3 is going home")
+            print("\033[92mTruck #3 is going home!\033[0m")
     else:
-        print("Truck #3 is on the road!!!")
-        print(len(current_route_truck3))
-        print(need_route_recalculation_truck3)
+        print("\033[1m\033[33mTruck #3 is on the road!!!\033[0m")
         if not current_route_truck3 or need_route_recalculation_truck3:
             need_route_recalculation_truck3 = False
             current_route_truck3 = draw_route(queue_truck3, "3")
 
+        print(f"\033[90mWaypoints remaining for truck #3 route: {len(current_route_truck3)}\033[0m")
         waypoint = current_route_truck3.pop(0)
 
         if not current_route_truck3:
-            print("\nTruck #3 finished route\n")
+            print("\n\033[04mTruck #3 finished route\033[0m\n")
             # Route is finished, clear all the garbage containers from the queue
             queue_truck3 = []
             # Delete truck route from the map
