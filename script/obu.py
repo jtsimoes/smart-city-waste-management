@@ -192,7 +192,7 @@ while True:
     ##### TRUCK #1 #####
     if not queue_truck1 and not current_route_truck1:
         # Truck don't have any garbage container assigned to it, so it can go/stay at home
-        if truck_positions[0] == HOME_TRUCK1:
+        if math.dist(HOME_TRUCK1, truck_positions[0]) < 0.0001:
             # Truck is already at home, can stay in the same position
             waypoint = HOME_TRUCK1
             print("Truck #1 is at home waiting for a mission")
@@ -228,7 +228,7 @@ while True:
     ##### TRUCK #2 #####
     if not queue_truck2 and not current_route_truck2:
         # Truck don't have any garbage container assigned to it, so it can go/stay at home
-        if truck_positions[1] == HOME_TRUCK2:
+        if math.dist(HOME_TRUCK2, truck_positions[1]) < 0.0001:
             # Truck is already at home, can stay in the same position
             waypoint = HOME_TRUCK2
             print("Truck #2 is at home waiting for a mission")
@@ -263,7 +263,7 @@ while True:
     ##### TRUCK #3 #####
     if not queue_truck3 and not current_route_truck3:
         # Truck don't have any garbage container assigned to it, so it can go/stay at home
-        if truck_positions[2] == HOME_TRUCK3:
+        if math.dist(HOME_TRUCK3, truck_positions[2]) < 0.0001:
             # Truck is already at home, can stay in the same position
             waypoint = HOME_TRUCK3
             print("Truck #3 is at home waiting for a mission")
