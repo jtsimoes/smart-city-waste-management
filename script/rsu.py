@@ -8,6 +8,11 @@ import os
 # Fill percentage at which the garbage container is considered full and needs to be emptied
 WARNING_PERCENTAGE = 70
 
+# Limit percentage of the total number of garbage containers that can be assigned to a single truck
+THRESHOLD_PERCENTAGE = 75
+
+threshold = THRESHOLD_PERCENTAGE / 100
+
 # Get coordinates of all garbage containers
 path = '../sensor/sensor_position.json'
 if not os.path.isfile(path):
@@ -24,6 +29,16 @@ truck_positions = [
     [None, None],
     [None, None],
 ]
+
+# Count the number of garbage containers assigned to each truck
+truck_assigned_garbage_counts = [
+    0,
+    0,
+    0,
+]
+
+# Count the total number of garbage containers assigned to all trucks
+total_assigned_garbage_count = 0
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
@@ -61,11 +76,17 @@ def generate(garbage_id, latitude, longitude):
 
     # Find the nearest truck to collect garbage
     for (truck_id, truck_position) in enumerate(truck_positions):
+        global truck_assigned_garbage_counts, total_assigned_garbage_count
+
         lat, lon = truck_position[0], truck_position[1]
 
         # Don't generate a DENM message if the truck position is unknown
         if lat == None or lon == None:
             return False
+
+        # If the truck is already assigned to too many garbage containers, assign it to the next nearest one
+        if(truck_assigned_garbage_counts[truck_id] > total_assigned_garbage_count * threshold):
+            continue
 
         distance = math.dist((latitude, longitude), (lat, lon))
         
@@ -74,6 +95,13 @@ def generate(garbage_id, latitude, longitude):
             nearest_truck = truck_id + 1
 
     m["situation"]["eventType"]["subCauseCode"] = nearest_truck
+
+    # Add one more garbage container to the count of the truck that was assigned to collect it
+    truck_assigned_garbage_counts[nearest_truck - 1] += 1
+
+    # Add one more garbage container to the total count
+    total_assigned_garbage_count += 1
+
     m = json.dumps(m)
     client.publish("vanetza/in/denm", m)
     #print("publishing")
