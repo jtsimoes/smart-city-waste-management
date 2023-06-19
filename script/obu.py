@@ -217,7 +217,7 @@ while True:
             print("\033[92mTruck #1 is going home!\033[0m")
     else:
         # Truck received a DENM message and needs to interrupt the default route to go empty a garbage container
-        print("\033[1m\033[33mTruck #1 is on the road!!!\033[0m")
+        print("\033[1m\033[34mTruck #1 is on the road!!!\033[0m")
         if not current_route_truck1 or need_route_recalculation_truck1:
             need_route_recalculation_truck1 = False
             current_route_truck1 = draw_route(queue_truck1, "1")
@@ -226,7 +226,7 @@ while True:
         waypoint = current_route_truck1.pop(0)
 
         if not current_route_truck1:
-            print("\n\033[04mTruck #1 finished route\033[0m\n")
+            print("\n\033[01m\033[33m\033[04mTruck #1 finished route\033[0m\n")
             # Route is finished, clear all the garbage containers from the queue
             queue_truck1 = []
             # Delete truck route from the map
@@ -251,7 +251,7 @@ while True:
             waypoint = current_route_truck2.pop(0)
             print("\033[92mTruck #2 is going home!\033[0m")
     else:
-        print("\033[1m\033[33mTruck #2 is on the road!!!\033[0m")
+        print("\033[1m\033[34mTruck #2 is on the road!!!\033[0m")
         if not current_route_truck2 or need_route_recalculation_truck2:
             need_route_recalculation_truck2 = False
             current_route_truck2 = draw_route(queue_truck2, "2")
@@ -260,7 +260,7 @@ while True:
         waypoint = current_route_truck2.pop(0)
 
         if not current_route_truck2:
-            print("\n\033[04mTruck #2 finished route\033[0m\n")
+            print("\n\033[01m\033[33m\033[04mTruck #2 finished route\033[0m\n")
             # Route is finished, clear all the garbage containers from the queue
             queue_truck2 = []
             # Delete truck route from the map
@@ -285,7 +285,7 @@ while True:
             waypoint = current_route_truck3.pop(0)
             print("\033[92mTruck #3 is going home!\033[0m")
     else:
-        print("\033[1m\033[33mTruck #3 is on the road!!!\033[0m")
+        print("\033[1m\033[34mTruck #3 is on the road!!!\033[0m")
         if not current_route_truck3 or need_route_recalculation_truck3:
             need_route_recalculation_truck3 = False
             current_route_truck3 = draw_route(queue_truck3, "3")
@@ -294,7 +294,7 @@ while True:
         waypoint = current_route_truck3.pop(0)
 
         if not current_route_truck3:
-            print("\n\033[04mTruck #3 finished route\033[0m\n")
+            print("\n\033[01m\033[33m\033[04mTruck #3 finished route\033[0m\n")
             # Route is finished, clear all the garbage containers from the queue
             queue_truck3 = []
             # Delete truck route from the map
