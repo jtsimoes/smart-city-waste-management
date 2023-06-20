@@ -64,6 +64,8 @@ def on_message(client, userdata, msg):
 
 
 def generate(garbage_id, latitude, longitude):
+    global truck_assigned_garbage_counts, total_assigned_garbage_count
+    
     f = open('in_denm.json')
     m = json.load(f)
     m["management"]["actionID"]["originatingStationID"] = garbage_id + 1
@@ -76,8 +78,6 @@ def generate(garbage_id, latitude, longitude):
 
     # Find the nearest truck to collect garbage
     for (truck_id, truck_position) in enumerate(truck_positions):
-        global truck_assigned_garbage_counts, total_assigned_garbage_count
-
         lat, lon = truck_position[0], truck_position[1]
 
         # Don't generate a DENM message if the truck position is unknown
