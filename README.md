@@ -1,5 +1,13 @@
 # Smart City Waste Management
-Final project for the subject of [Autonomous Networks and Systems](https://www.ua.pt/en/uc/15279) of the [University of Aveiro](https://www.ua.pt/).
+> Final project for the subject of [Autonomous Networks and Systems](https://www.ua.pt/en/uc/15279) of the [University of Aveiro](https://www.ua.pt/).
+
+<br/>
+
+<div align="center">
+    
+[<img src="https://i.imgur.com/CjlV8pL.png" alt="Demo video" title="Demo video" width="600"/>](https://www.youtube.com/watch?v=uQnLSh7sIpU)
+
+</div>
 
 ## About
 
